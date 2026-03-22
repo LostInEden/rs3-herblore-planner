@@ -820,22 +820,44 @@ function fmtFull(n){ return n.toLocaleString(); }
 // ════════════════════════════════════════════════════════
 // RENDER HERB LIST
 // ════════════════════════════════════════════════════════
+
+// Standard RS3 herbs (farmable, tradeable)
+const STANDARD_HERBS = new Set([
+  'Guam','Marrentill','Tarromin','Harralander','Ranarr weed',
+  'Toadflax','Irit leaf','Avantoe','Kwuarm','Snapdragon',
+  'Cadantine','Lantadyme','Dwarf weed','Torstol','Fellstalk',
+  'Spirit weed','Arbuck','Bloodweed',
+]);
+
 function renderHerbList(){
   const el = document.getElementById('herbList');
-  // Keep header, rebuild items
-  el.innerHTML = '<div class="herb-list-head">Herbs</div>';
-  for(const herb of ALL_HERBS){
-    const qty = getHerbQty(herb);
-    const div = document.createElement('div');
-    div.className = `herb-item${qty>0?' has-stock':''}${S.activeHerb===herb?' active':''}`;
-    div.dataset.herb = herb;
-    div.innerHTML = `
-      <div class="herb-dot"></div>
-      <div class="herb-name">${herb}</div>
-      <div class="herb-badge${qty===0?' zero':''}">${qty>0?qty:'—'}</div>`;
-    div.onclick = () => selectHerb(herb);
-    el.appendChild(div);
+  el.innerHTML = '';
+
+  const standard = ALL_HERBS.filter(h => STANDARD_HERBS.has(h));
+  const special   = ALL_HERBS.filter(h => !STANDARD_HERBS.has(h));
+
+  function addSection(label, herbs){
+    const head = document.createElement('div');
+    head.className = 'herb-list-head';
+    head.textContent = label;
+    el.appendChild(head);
+
+    for(const herb of herbs){
+      const qty = getHerbQty(herb);
+      const div = document.createElement('div');
+      div.className = `herb-item${qty>0?' has-stock':''}${S.activeHerb===herb?' active':''}`;
+      div.dataset.herb = herb;
+      div.innerHTML = `
+        <div class="herb-dot"></div>
+        <div class="herb-name">${herb}</div>
+        <div class="herb-badge${qty===0?' zero':''}">${qty>0?qty:'—'}</div>`;
+      div.onclick = () => selectHerb(herb);
+      el.appendChild(div);
+    }
   }
+
+  addSection('Herbs', standard);
+  if(special.length > 0) addSection('Special Herbs', special);
 }
 
 // ════════════════════════════════════════════════════════

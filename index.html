@@ -712,33 +712,37 @@ const S = {
 };
 
 // ════════════════════════════════════════════════════════
-// DERIVED LOOKUPS
+// DERIVED LOOKUPS — built after DATA loads
 // ════════════════════════════════════════════════════════
-const POT_BY_NAME = {};
-DATA.potions.forEach(p => POT_BY_NAME[p.name] = p);
+let POT_BY_NAME = {};
+let NORM_TO_NAME = {};
+let ALL_HERBS = [];
+let ALL_SECONDARIES = [];
 
-// Normalise: strip dose suffix for matching
 function norm(n){ return n.replace(/\s*\(\d\)\s*$/, '').trim(); }
-const NORM_TO_NAME = {};
-DATA.potions.forEach(p => { NORM_TO_NAME[norm(p.name)] = p.name; });
-
 function getPot(name){ return POT_BY_NAME[name] || POT_BY_NAME[NORM_TO_NAME[norm(name)]]; }
 
-// All unique herb names from herb_to_potions
-const ALL_HERBS = Object.keys(DATA.herb_to_potions).sort();
+function buildDerivedData(){
+  POT_BY_NAME = {};
+  DATA.potions.forEach(p => POT_BY_NAME[p.name] = p);
 
-// All secondaries across all potions
-const ALL_SECONDARIES = [];
-const _secSeen = new Set();
-DATA.potions.forEach(p => {
-  p.secondaries.forEach(s => {
-    if(!_secSeen.has(s.name) && !s.name.includes('Dungeoneering') && !s.name.includes('Vial of water')){
-      _secSeen.add(s.name);
-      ALL_SECONDARIES.push(s.name);
-    }
+  NORM_TO_NAME = {};
+  DATA.potions.forEach(p => { NORM_TO_NAME[norm(p.name)] = p.name; });
+
+  ALL_HERBS = Object.keys(DATA.herb_to_potions).sort();
+
+  ALL_SECONDARIES = [];
+  const _secSeen = new Set();
+  DATA.potions.forEach(p => {
+    p.secondaries.forEach(s => {
+      if(!_secSeen.has(s.name) && !s.name.includes('Dungeoneering') && !s.name.includes('Vial of water')){
+        _secSeen.add(s.name);
+        ALL_SECONDARIES.push(s.name);
+      }
+    });
   });
-});
-ALL_SECONDARIES.sort();
+  ALL_SECONDARIES.sort();
+}
 
 function getHerbQty(h){ return S.herbs[h] || 0; }
 function getSecQty(s){ return S.secondaries[s] || 0; }
@@ -1517,6 +1521,7 @@ document.head.appendChild(style);
 (async () => {
   try {
     await loadPotionData();
+    buildDerivedData();
     await loadUserStock();
     renderHerbList();
     switchTab('explorer');

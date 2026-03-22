@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RS3 Herblore Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:         #09100a;
+  --bg2:        #0d140e;
+  --bg3:        #111811;
+  --panel:      #121912;
+  --panel2:     #161e16;
+  --border:     #1e2b1e;
+  --border2:    #28392a;
+  --border3:    #344d36;
+  --gold:       #c8a84b;
+  --gold2:      #dfc06a;
+  --gold3:      #f0d880;
+  --gold-dim:   #5a4a18;
+  --green:      #3d6b35;
+  --green2:     #5da852;
+  --green3:     #7dd870;
+  --green-dim:  #1a2e18;
+  --text:       #c8c4b0;
+  --text-dim:   #5e5c50;
+  --text-br:    #e8e2cc;
+  --red:        #7a2e20;
+  --red2:       #b84838;
+  --blue:       #3868a0;
+  --blue2:      #5898d8;
+  --purple:     #7040a8;
+  --purple2:    #a870e0;
+  --orange:     #b87020;
+  --orange2:    #d89040;
+  --tbasic:     #5a8a4a;
+  --tsuper:     #4878a8;
+  --textreme:   #9040c0;
+  --toverload:  #c84040;
+  --telder:     #e08020;
+  --tcomb:      #40a0c0;
+  --tjuju:      #208870;
+  --tbarbarian: #886030;
+  --tbomb:      #a83020;
+  --tpowerburst:#6040c8;
+  --tdaemon:    #608080;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:15px;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background-image:
+    radial-gradient(ellipse at 15% 0%,rgba(61,107,53,.08) 0%,transparent 55%),
+    radial-gradient(ellipse at 85% 100%,rgba(200,168,75,.04) 0%,transparent 55%);
+}
+
+/* ── HEADER ── */
+header {
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:10px 20px;
+  border-bottom:1px solid var(--border2);
+  background:linear-gradient(180deg,rgba(61,107,53,.08) 0%,transparent 100%);
+  z-index:20;
+}
+.logo {
+  width:34px;height:34px;
+  background:radial-gradient(circle at 40% 35%,var(--green3),var(--green));
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+  box-shadow:0 0 16px rgba(93,168,82,.4);
+  flex-shrink:0;
+}
+.header-title {
+  font-family:'Cinzel',serif;
+  font-size:16px;font-weight:700;
+  color:var(--gold2);
+  letter-spacing:.06em;
+  text-shadow:0 0 20px rgba(200,168,75,.3);
+}
+.header-sub {font-size:11px;color:var(--text-dim);font-style:italic;margin-top:1px}
+.header-mid {flex:1;display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* Tabs */
+.tabs {display:flex;gap:3px;background:var(--bg3);border-radius:6px;padding:3px}
+.tab {
+  padding:5px 14px;border-radius:4px;border:none;
+  background:transparent;color:var(--text-dim);
+  font-family:'Crimson Pro',serif;font-size:13px;
+  cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--panel2);color:var(--gold2);box-shadow:0 1px 4px rgba(0,0,0,.4)}
+
+/* Level input */
+.lvl-wrap{display:flex;align-items:center;gap:7px}
+.lvl-label{font-size:12px;color:var(--text-dim)}
+.lvl-input {
+  width:58px;background:var(--bg);border:1px solid var(--border2);
+  border-radius:4px;color:var(--blue2);
+  font-family:'JetBrains Mono',monospace;font-size:14px;
+  padding:3px 7px;text-align:center;-moz-appearance:textfield;
+}
+.lvl-input::-webkit-outer-spin-button,.lvl-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.lvl-input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(88,152,216,.15)}
+
+/* ── LAYOUT ── */
+.app-body{flex:1;display:grid;grid-template-columns:230px 1fr;overflow:hidden}
+
+/* ── HERB LIST ── */
+.herb-list {
+  border-right:1px solid var(--border);
+  overflow-y:auto;background:var(--panel);
+  display:flex;flex-direction:column;
+}
+.herb-list::-webkit-scrollbar{width:3px}
+.herb-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.herb-list-head {
+  padding:10px 14px 6px;
+  font-family:'Cinzel',serif;font-size:9px;
+  letter-spacing:.18em;color:var(--gold-dim);
+  text-transform:uppercase;border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+
+.herb-item {
+  display:flex;align-items:center;gap:10px;
+  padding:8px 14px;cursor:pointer;
+  transition:background .14s;
+  border-left:2px solid transparent;
+  position:relative;
+}
+.herb-item:hover{background:rgba(255,255,255,.025)}
+.herb-item.active{background:rgba(93,168,82,.07);border-left-color:var(--green2)}
+.herb-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background .2s}
+.herb-item.active .herb-dot,.herb-item.has-stock .herb-dot{background:var(--green2);box-shadow:0 0 5px rgba(93,168,82,.5)}
+.herb-name{font-size:13px;color:var(--text);flex:1}
+.herb-item.has-stock .herb-name{color:var(--gold2)}
+.herb-badge {
+  font-size:11px;font-family:'JetBrains Mono',monospace;
+  color:var(--green2);background:rgba(93,168,82,.12);
+  border:1px solid rgba(93,168,82,.2);border-radius:3px;
+  padding:1px 5px;min-width:28px;text-align:center;
+}
+.herb-badge.zero{color:var(--text-dim);background:transparent;border-color:var(--border)}
+
+/* ── RIGHT PANEL ── */
+.right-panel{display:flex;flex-direction:column;overflow:hidden}
+
+/* ── HERB HEADER ── */
+.herb-header {
+  flex-shrink:0;padding:14px 20px 12px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg3);
+  display:none;
+}
+.herb-header.visible{display:flex;align-items:flex-start;gap:14px}
+.herb-header-icon {
+  width:44px;height:44px;border-radius:6px;
+  background:var(--green-dim);border:1px solid var(--green);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;
+}
+.herb-header-info{flex:1}
+.herb-header-name{font-family:'Cinzel',serif;font-size:17px;font-weight:700;color:var(--text-br)}
+.herb-header-meta{font-size:12px;color:var(--text-dim);font-style:italic;margin-top:2px}
+.stock-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.stock-label{font-size:12px;color:var(--text-dim)}
+.stock-input {
+  width:84px;background:var(--bg);border:1px solid var(--border2);
+  border-radius:4px;color:var(--gold2);
+  font-family:'JetBrains Mono',monospace;font-size:14px;
+  padding:3px 8px;text-align:right;-moz-appearance:textfield;
+}
+.stock-input::-webkit-outer-spin-button,.stock-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.stock-input:focus{outline:none;border-color:var(--green2);box-shadow:0 0 0 2px rgba(93,168,82,.15)}
+.xp-stat{margin-left:auto;text-align:right}
+.xp-stat-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em}
+.xp-stat-val{font-family:'Cinzel',serif;font-size:19px;color:var(--gold3);text-shadow:0 0 10px rgba(240,216,128,.2)}
+
+/* ── MAIN AREA ── */
+.main-area{flex:1;overflow-y:auto;padding:16px 20px;background:var(--bg2)}
+.main-area::-webkit-scrollbar{width:4px}
+.main-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;height:100%;gap:12px;
+  color:var(--text-dim);text-align:center;
+}
+.empty-state .ei{font-size:50px;opacity:.2}
+.empty-state h3{font-family:'Cinzel',serif;font-size:15px;color:var(--text-dim);font-weight:400}
+.empty-state p{font-size:13px;font-style:italic;max-width:300px;line-height:1.7}
+
+/* ── SECTION DIVIDER ── */
+.sdiv{display:flex;align-items:center;gap:10px;margin:24px 0 12px}
+.sdiv-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;color:var(--text-dim)}
+.sdiv-line{flex:1;height:1px;background:var(--border)}
+
+/* ── POTION CARD — redesigned for breathing room ── */
+.pot-card {
+  display:grid;
+  grid-template-columns:1fr auto;
+  grid-template-rows:auto auto;
+  gap:0;
+  padding:16px 18px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  margin-bottom:10px;
+  transition:border-color .2s, background .2s, transform .15s;
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.pot-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:var(--tc,var(--border2));
+  border-radius:8px 0 0 8px;
+}
+.pot-card:hover{
+  border-color:var(--border3);
+  background:var(--panel2);
+  transform:translateY(-1px);
+}
+.pot-card.can-make{ border-color:rgba(93,168,82,.25); }
+.pot-card.can-make::before{ background:var(--green2); }
+.pot-card.missing::before{ background:var(--gold-dim); }
+.pot-card.locked{ opacity:.7; }
+.pot-card.locked::before{ background:var(--border2); }
+.pot-card.chained{
+  margin-left:28px;
+  border-style:solid;
+  background:transparent;
+  padding:12px 16px;
+}
+
+/* Card top row: name + level + qty */
+.pot-card-top{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:10px;
+  grid-column:1;
+}
+.pot-icon{
+  width:38px;height:38px;border-radius:6px;
+  background:var(--bg3);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.pot-name{
+  font-family:'Cinzel',serif;font-size:14px;font-weight:600;
+  color:var(--text-br);flex:1;line-height:1.3;
+}
+.pot-card.chained .pot-name{ font-size:13px; }
+.pot-lvl{
+  font-size:11px;font-family:'JetBrains Mono',monospace;
+  padding:2px 7px;border-radius:4px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border2);
+  color:var(--text-dim);white-space:nowrap;flex-shrink:0;
+}
+.pot-lvl.met{color:var(--green2);border-color:rgba(93,168,82,.3);background:rgba(93,168,82,.06)}
+.pot-lvl.locked{color:var(--red2);border-color:rgba(184,72,56,.3);background:rgba(122,46,32,.06)}
+
+/* qty — right side, spans 2 rows */
+.pot-right{
+  grid-column:2;grid-row:1/3;
+  display:flex;flex-direction:column;align-items:flex-end;
+  justify-content:center;padding-left:16px;
+  border-left:1px solid var(--border);margin-left:12px;
+  min-width:60px;
+}
+.pot-qty{
+  font-family:'Cinzel',serif;font-size:28px;line-height:1;
+  color:var(--green3);text-shadow:0 0 12px rgba(125,216,112,.25);
+}
+.pot-qty.zero{color:var(--border2);text-shadow:none;font-size:22px}
+.pot-qty-label{font-size:10px;color:var(--text-dim);margin-top:3px;text-align:right}
+
+/* Card bottom row: meta info */
+.pot-card-bottom{
+  grid-column:1;
+  display:flex;flex-direction:column;gap:8px;
+}
+
+/* XP + status row */
+.pot-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pot-xp{
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--gold);background:rgba(200,168,75,.07);
+  border:1px solid rgba(200,168,75,.18);
+  border-radius:4px;padding:2px 8px;
+}
+.pot-total-xp{
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--gold3);background:rgba(240,216,128,.07);
+  border:1px solid rgba(240,216,128,.2);
+  border-radius:4px;padding:2px 8px;font-weight:600;
+}
+.pot-status{font-size:12px;color:var(--text-dim);font-style:italic}
+.pot-status.warn{color:var(--red2)}
+.pot-status.chain{color:var(--purple2)}
+
+/* Ingredients row */
+.ing-row{display:flex;flex-wrap:wrap;gap:5px}
+.ing{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:4px;
+  border:1px solid var(--border);background:var(--bg);
+  color:var(--text-dim);font-size:12px;
+}
+.ing.have{border-color:rgba(93,168,82,.25);color:var(--green2);background:rgba(93,168,82,.05)}
+.ing.need{border-color:rgba(184,72,56,.25);color:var(--red2);background:rgba(122,46,32,.05)}
+
+/* ── CHAIN CONNECTOR ── */
+.chain-connector{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 0 6px 12px;
+  margin:-4px 0 2px;
+  color:var(--text-dim);font-size:12px;font-style:italic;
+}
+.chain-connector-line{
+  width:20px;height:1px;background:var(--border2);flex-shrink:0;
+}
+.chain-connector-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--border2);flex-shrink:0;
+}
+
+/* Old chain-arrow compat */
+.chain-arrow{display:flex;align-items:center;gap:6px;padding:4px 0 4px 8px;margin:2px 0 4px;color:var(--text-dim);font-size:12px;font-style:italic}
+.chain-arrow::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);max-width:60px}
+
+/* ── CHAIN TREE ── */
+.chain-tree{
+  margin:-4px 0 14px 2px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  overflow:hidden;
+  background:var(--bg3);
+}
+.chain-tree-header{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 14px;
+  background:var(--bg3);
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+  user-select:none;
+  transition:background .15s;
+}
+.chain-tree-header:hover{ background:var(--panel); }
+.chain-tree-toggle{
+  font-size:12px;color:var(--text-dim);
+  transition:transform .15s;width:12px;
+}
+.chain-tree-title{
+  font-size:11px;color:var(--text-dim);
+  font-style:italic;letter-spacing:.04em;
+}
+.chain-tree-body{
+  padding:6px 0;
+}
+.chain-tree-row{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 14px;
+  cursor:pointer;
+  transition:background .12s;
+  border-bottom:1px solid rgba(255,255,255,.02);
+}
+.chain-tree-row:last-child{ border-bottom:none; }
+.chain-tree-row:hover{ background:rgba(255,255,255,.03); }
+.chain-tree-line{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--border2);
+  flex-shrink:0;width:18px;
+}
+.chain-tree-icon{ font-size:14px;flex-shrink:0; }
+.chain-tree-name{
+  flex:1;font-size:13px;color:var(--text);
+  font-family:'Crimson Pro',serif;
+}
+.chain-tree-lvl{
+  font-size:11px;font-family:'JetBrains Mono',monospace;
+  padding:1px 5px;border-radius:3px;
+  color:var(--text-dim);border:1px solid var(--border);
+  background:transparent;flex-shrink:0;
+}
+.chain-tree-lvl.ok{ color:var(--green2);border-color:rgba(93,168,82,.25); }
+.chain-tree-lvl.locked{ color:var(--red2);border-color:rgba(184,72,56,.25); }
+.chain-tree-xp{
+  font-size:11px;color:var(--gold);
+  font-family:'JetBrains Mono',monospace;
+  flex-shrink:0;
+}
+.chain-tree-qty{
+  font-size:12px;color:var(--green2);
+  font-family:'JetBrains Mono',monospace;
+  background:rgba(93,168,82,.1);border:1px solid rgba(93,168,82,.2);
+  border-radius:3px;padding:1px 6px;flex-shrink:0;
+}
+.chain-tree-locked{ font-size:11px;flex-shrink:0; }
+.chain-tree-recipe{
+  display:flex;align-items:center;gap:5px;
+  margin-left:4px;flex-wrap:wrap;
+}
+.chain-tree-ing{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:11px;padding:1px 6px;border-radius:3px;
+  border:1px solid var(--border);background:var(--bg);color:var(--text-dim);
+  white-space:nowrap;
+}
+.chain-tree-ing em{ font-style:normal;opacity:.6; }
+.chain-tree-ing.have{
+  border-color:rgba(93,168,82,.25);
+  color:var(--green2);background:rgba(93,168,82,.06);
+}
+.chain-tree-ing.need{
+  border-color:rgba(184,72,56,.25);
+  color:var(--red2);background:rgba(122,46,32,.06);
+}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{display:flex;align-items:center;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.bc-item{font-size:12px;color:var(--text-dim);cursor:pointer;transition:color .15s}
+.bc-item:hover{color:var(--gold2)}
+.bc-item.current{color:var(--text-br);cursor:default}
+.bc-sep{color:var(--border2);font-size:12px}
+
+/* ── XP RANK TABLE ── */
+.rank-table{border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:14px}
+.rank-row{
+  display:grid;grid-template-columns:26px 1fr 80px 90px 70px;
+  padding:7px 12px;border-bottom:1px solid var(--border);
+  align-items:center;font-size:13px;transition:background .12s;
+}
+.rank-row:last-child{border-bottom:none}
+.rank-row:hover{background:rgba(255,255,255,.02)}
+.rank-row.head{background:var(--bg3);font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase}
+.rn{color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:11px}
+.rname{color:var(--text-br)}
+.rxp{color:var(--gold);text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px}
+.rtxp{color:var(--gold3);text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
+.rqty{color:var(--green2);text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px}
+.rank-row.r1 .rname{color:var(--gold3)}
+.rank-row.r2 .rname{color:var(--gold2)}
+.rank-row.r3 .rname{color:var(--gold)}
+
+/* ── SECONDARIES TAB ── */
+.sec-herb-block{ margin-bottom:28px; }
+.sec-herb-label{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:10px;
+}
+.sec-herb-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green2);
+  box-shadow:0 0 6px rgba(93,168,82,.5);
+  flex-shrink:0;
+}
+.sec-herb-name{
+  font-family:'Cinzel',serif;font-size:12px;font-weight:600;
+  color:var(--gold2);letter-spacing:.06em;
+}
+.sec-herb-line{flex:1;height:1px;background:var(--border)}
+.sec-herb-count{font-size:11px;color:var(--text-dim);font-style:italic;white-space:nowrap}
+
+.sec-cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:8px;
+}
+.sec-card{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;
+  border-radius:6px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  transition:border-color .18s;
+}
+.sec-card:hover{ border-color:var(--border2); }
+.sec-card.has-qty{ border-color:rgba(200,168,75,.2); }
+.sec-card-info{ flex:1;min-width:0; }
+.sec-card-name{
+  font-size:14px;color:var(--text-br);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:2px;
+}
+.sec-card-sub{
+  font-size:11px;color:var(--text-dim);font-style:italic;
+}
+.sec-card-shared{
+  font-size:11px;color:var(--blue2);
+}
+.sec-card-input{
+  width:72px;flex-shrink:0;
+  background:var(--bg);
+  border:1px solid var(--border2);
+  border-radius:4px;
+  color:var(--gold2);
+  font-family:'JetBrains Mono',monospace;
+  font-size:14px;
+  padding:5px 8px;
+  text-align:right;
+}
+.sec-card-input:focus{
+  outline:none;
+  border-color:var(--green2);
+  box-shadow:0 0 0 2px rgba(93,168,82,.12);
+}
+.sec-card-input.has-qty{ border-color:var(--gold-dim); }
+
+/* ── TIER COLORS ── */
+.tier-basic     {--tc:var(--tbasic)}
+.tier-super     {--tc:var(--tsuper)}
+.tier-extreme   {--tc:var(--textreme)}
+.tier-overload  {--tc:var(--toverload)}
+.tier-overload_variant{--tc:var(--toverload)}
+.tier-supreme_overload{--tc:var(--telder)}
+.tier-elder_overload  {--tc:var(--telder)}
+.tier-combination{--tc:var(--tcomb)}
+.tier-juju      {--tc:var(--tjuju)}
+.tier-barbarian {--tc:var(--tbarbarian)}
+.tier-bomb      {--tc:var(--tbomb)}
+.tier-powerburst{--tc:var(--tpowerburst)}
+.tier-daemonheim{--tc:var(--tdaemon)}
+.tier-primal    {--tc:var(--tbasic)}
+.tier-adrenaline{--tc:var(--tpowerburst)}
+
+/* ── SUMMARY STRIP ── */
+.summary-strip{
+  display:flex;gap:16px;padding:12px 16px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:6px;margin-bottom:14px;
+}
+.ss-item{display:flex;flex-direction:column;gap:2px}
+.ss-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em}
+.ss-val{font-family:'Cinzel',serif;font-size:18px;color:var(--gold2)}
+.ss-best{font-family:'Cinzel',serif;font-size:14px;color:var(--gold2);margin-top:3px}
+
+/* potion drill-in header */
+.pot-drill-header{
+  padding:14px 20px 12px;border-bottom:1px solid var(--border);
+  background:var(--bg3);flex-shrink:0;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.pot-drill-icon{width:40px;height:40px;border-radius:6px;background:var(--bg);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.pot-drill-name{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--text-br)}
+.pot-drill-meta{font-size:12px;color:var(--text-dim);font-style:italic;margin-top:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🌿</div>
+  <div>
+    <div class="header-title">Herblore Planner</div>
+    <div class="header-sub">RS3 Crafting Chain & XP Calculator</div>
+  </div>
+  <div class="header-mid">
+    <div class="tabs">
+      <button class="tab active" id="tab-explorer" onclick="switchTab('explorer')">🔍 Herb Explorer</button>
+      <button class="tab" id="tab-secondaries" onclick="switchTab('secondaries')">🧪 Secondaries</button>
+      <button class="tab" id="tab-xprank" onclick="switchTab('xprank')">⭐ XP Rankings</button>
+    </div>
+  </div>
+  <div class="lvl-wrap">
+    <span class="lvl-label">Herblore Lvl</span>
+    <input class="lvl-input" id="playerLvl" type="number" min="1" max="120" value="99">
+  </div>
+</header>
+
+<div class="app-body">
+  <div class="herb-list" id="herbList">
+    <div class="herb-list-head">Herbs</div>
+  </div>
+  <div class="right-panel" id="rightPanel">
+    <div class="herb-header" id="herbHeader"></div>
+    <div class="main-area" id="mainArea">
+      <div class="empty-state">
+        <div class="ei">⚗️</div>
+        <h3>Select a herb to explore</h3>
+        <p>Click any herb on the left to see every potion it can make, the full crafting chain, XP values, and what you can make from your current stock.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://wvqzypwpchvmwbmcmocf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_LZnQmDIuQ42rbZBqXBvsRg_SLMiBJpW';
+
+let DATA = null; // loaded from Supabase on init
+
+async function supabaseGet(table, query='') {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
+  const r = await fetch(url, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  if(!r.ok) throw new Error(`Supabase GET failed: ${r.status}`);
+  return r.json();
+}
+
+async function supabaseUpsert(table, body) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}`;
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates',
+    },
+    body: JSON.stringify(body),
+  });
+  if(!r.ok) throw new Error(`Supabase upsert failed: ${r.status}`);
+}
+
+// ── Load potion data from Supabase ──
+async function loadPotionData() {
+  showLoadingState('Loading potion data...');
+  try {
+    const rows = await supabaseGet('rs3_potions', '?id=eq.1&select=data');
+    if(!rows || rows.length === 0) throw new Error('No data in rs3_potions table. Run fetch_rs3_potions.py first.');
+    DATA = rows[0].data;
+    console.log(`Loaded ${DATA.potions.length} potions from Supabase`);
+  } catch(e) {
+    showErrorState(e.message);
+    throw e;
+  }
+}
+
+// ── Load user stock from Supabase ──
+async function loadUserStock() {
+  try {
+    const rows = await supabaseGet('rs3_user_stock', "?id=eq.default&select=herbs,secondaries");
+    if(rows && rows.length > 0) {
+      S.herbs       = rows[0].herbs       || {};
+      S.secondaries = rows[0].secondaries || {};
+      console.log('Loaded user stock from Supabase');
+    }
+  } catch(e) {
+    console.warn('Could not load user stock:', e.message);
+  }
+}
+
+// ── Save user stock to Supabase (debounced) ──
+let _saveTimer = null;
+function saveUserStock() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(async () => {
+    try {
+      await supabaseUpsert('rs3_user_stock', {
+        id: 'default',
+        herbs: S.herbs,
+        secondaries: S.secondaries,
+        updated_at: new Date().toISOString(),
+      });
+    } catch(e) {
+      console.warn('Could not save stock:', e.message);
+    }
+  }, 1500); // save 1.5s after last change
+}
+
+function showLoadingState(msg) {
+  document.getElementById('mainArea').innerHTML = `
+    <div class="empty-state">
+      <div class="ei" style="animation:spin 1.5s linear infinite">⚗️</div>
+      <h3>${msg}</h3>
+    </div>`;
+}
+
+function showErrorState(msg) {
+  document.getElementById('mainArea').innerHTML = `
+    <div class="empty-state">
+      <div class="ei">⚠️</div>
+      <h3>Could not load data</h3>
+      <p style="color:var(--red2)">${msg}</p>
+      <p style="margin-top:8px">Make sure you've run <code style="background:var(--bg3);padding:2px 6px;border-radius:3px">python fetch_rs3_potions.py</code> to populate the database.</p>
+    </div>`;
+}
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+const S = {
+  herbs:       {},   // herb name -> qty
+  secondaries: {},   // secondary name -> qty
+  activeTab:   'explorer',
+  activeHerb:  null,
+  drillPotion: null, // potion being drilled into
+  navStack:    [],   // breadcrumb navigation
+};
+
+// ════════════════════════════════════════════════════════
+// DERIVED LOOKUPS
+// ════════════════════════════════════════════════════════
+const POT_BY_NAME = {};
+DATA.potions.forEach(p => POT_BY_NAME[p.name] = p);
+
+// Normalise: strip dose suffix for matching
+function norm(n){ return n.replace(/\s*\(\d\)\s*$/, '').trim(); }
+const NORM_TO_NAME = {};
+DATA.potions.forEach(p => { NORM_TO_NAME[norm(p.name)] = p.name; });
+
+function getPot(name){ return POT_BY_NAME[name] || POT_BY_NAME[NORM_TO_NAME[norm(name)]]; }
+
+// All unique herb names from herb_to_potions
+const ALL_HERBS = Object.keys(DATA.herb_to_potions).sort();
+
+// All secondaries across all potions
+const ALL_SECONDARIES = [];
+const _secSeen = new Set();
+DATA.potions.forEach(p => {
+  p.secondaries.forEach(s => {
+    if(!_secSeen.has(s.name) && !s.name.includes('Dungeoneering') && !s.name.includes('Vial of water')){
+      _secSeen.add(s.name);
+      ALL_SECONDARIES.push(s.name);
+    }
+  });
+});
+ALL_SECONDARIES.sort();
+
+function getHerbQty(h){ return S.herbs[h] || 0; }
+function getSecQty(s){ return S.secondaries[s] || 0; }
+function getPlayerLvl(){ return parseInt(document.getElementById('playerLvl').value) || 1; }
+
+// ════════════════════════════════════════════════════════
+// HOW MANY CAN I MAKE?
+// ════════════════════════════════════════════════════════
+function howMany(pot){
+  const lvl = getPlayerLvl();
+  if(lvl < pot.level) return 0;
+
+  let n = Infinity;
+
+  // Check herb via unfinished
+  if(pot.herb){
+    const hq = getHerbQty(pot.herb.name);
+    if(hq <= 0) return 0;
+    n = Math.min(n, hq);
+  }
+
+  // Check direct herbs (like Clean torstol in Overload)
+  for(const dh of pot.direct_herbs){
+    const hq = getHerbQty(dh.name);
+    if(hq <= 0) return 0;
+    n = Math.min(n, hq);
+  }
+
+  // Check secondaries
+  for(const s of pot.secondaries){
+    if(s.name.includes('Crystal flask') || s.name.includes('Vial') || s.name.includes('flask')) continue;
+    const sq = getSecQty(s.name);
+    if(sq <= 0) return 0;
+    n = Math.min(n, Math.floor(sq / s.qty));
+  }
+
+  // Potion inputs — mark as chained (we don't track intermediate stock)
+  if(pot.potion_inputs && pot.potion_inputs.length > 0) return -1;
+
+  return n === Infinity ? 0 : n;
+}
+
+function getMissing(pot){
+  const missing = [];
+  if(pot.herb && getHerbQty(pot.herb.name) <= 0)
+    missing.push({name: pot.herb.name, type:'herb'});
+  for(const dh of pot.direct_herbs)
+    if(getHerbQty(dh.name) <= 0) missing.push({name: dh.name, type:'herb'});
+  for(const s of pot.secondaries){
+    if(s.name.includes('Crystal flask') || s.name.includes('Vial') || s.name.includes('flask')) continue;
+    if(getSecQty(s.name) <= 0) missing.push({name: s.name, type:'secondary'});
+  }
+  return missing;
+}
+
+// ════════════════════════════════════════════════════════
+// TIER DISPLAY
+// ════════════════════════════════════════════════════════
+const TIER_LABELS = {
+  basic:'Basic', super:'Super', extreme:'Extreme',
+  overload:'Overload', overload_variant:'Overload Variant',
+  supreme_overload:'Supreme Overload', elder_overload:'Elder Overload',
+  combination:'Combination', juju:'Juju', barbarian:'Barbarian Mix',
+  bomb:'Bomb', powerburst:'Powerburst', daemonheim:'Dungeoneering',
+  primal:'Primal', adrenaline:'Adrenaline',
+};
+const TIER_ORDER = ['basic','super','extreme','overload','overload_variant',
+  'supreme_overload','elder_overload','combination','juju','barbarian',
+  'bomb','powerburst','primal','adrenaline','daemonheim'];
+
+function fmtN(n){ return n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n); }
+function fmtXP(n){ return n >= 1000 ? (n/1000).toFixed(1)+'k' : n.toFixed(1); }
+function fmtFull(n){ return n.toLocaleString(); }
+
+// ════════════════════════════════════════════════════════
+// RENDER HERB LIST
+// ════════════════════════════════════════════════════════
+function renderHerbList(){
+  const el = document.getElementById('herbList');
+  // Keep header, rebuild items
+  el.innerHTML = '<div class="herb-list-head">Herbs</div>';
+  for(const herb of ALL_HERBS){
+    const qty = getHerbQty(herb);
+    const div = document.createElement('div');
+    div.className = `herb-item${qty>0?' has-stock':''}${S.activeHerb===herb?' active':''}`;
+    div.dataset.herb = herb;
+    div.innerHTML = `
+      <div class="herb-dot"></div>
+      <div class="herb-name">${herb}</div>
+      <div class="herb-badge${qty===0?' zero':''}">${qty>0?qty:'—'}</div>`;
+    div.onclick = () => selectHerb(herb);
+    el.appendChild(div);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// SELECT HERB
+// ════════════════════════════════════════════════════════
+function selectHerb(herb){
+  S.activeHerb = herb;
+  S.drillPotion = null;
+  S.navStack = [{type:'herb', name:herb}];
+  document.querySelectorAll('.herb-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.herb === herb);
+  });
+  if(S.activeTab === 'explorer') renderExplorer();
+}
+
+// ════════════════════════════════════════════════════════
+// RENDER EXPLORER
+// ════════════════════════════════════════════════════════
+function renderExplorer(){
+  const hdr = document.getElementById('herbHeader');
+  const main = document.getElementById('mainArea');
+
+  if(!S.activeHerb){
+    hdr.className = 'herb-header';
+    main.innerHTML = `<div class="empty-state"><div class="ei">⚗️</div><h3>Select a herb to explore</h3><p>Click any herb on the left to see every potion it can make, the full crafting chain, XP values, and what you can make from your current stock.</p></div>`;
+    return;
+  }
+
+  if(S.drillPotion){
+    renderPotionDrill(hdr, main);
+    return;
+  }
+
+  renderHerbView(hdr, main);
+}
+
+// ════════════════════════════════════════════════════════
+// HERB VIEW
+// ════════════════════════════════════════════════════════
+function renderHerbView(hdr, main){
+  const herb = S.activeHerb;
+  const qty = getHerbQty(herb);
+  const herbData = DATA.herb_to_potions[herb] || {direct:[], indirect:[]};
+
+  // Compute max XP from direct makeable potions
+  let maxXP = 0;
+  let bestPot = null;
+  for(const pname of herbData.direct){
+    const p = getPot(pname);
+    if(!p) continue;
+    const n = howMany(p);
+    if(n > 0){
+      const txp = n * p.xp;
+      if(txp > maxXP){ maxXP = txp; bestPot = p; }
+    }
+  }
+
+  // Header
+  hdr.className = 'herb-header visible';
+  hdr.innerHTML = `
+    <div class="herb-header-icon">🌿</div>
+    <div class="herb-header-info">
+      <div class="herb-header-name">${herb}</div>
+      <div class="herb-header-meta">${herbData.direct.length} direct potion${herbData.direct.length!==1?'s':''} · ${herbData.indirect.length} indirect</div>
+      <div class="stock-row">
+        <span class="stock-label">Stock:</span>
+        <input class="stock-input" type="number" min="0" value="${qty||''}" placeholder="0" id="herbStockInput" />
+        <span style="font-size:12px;color:var(--text-dim);font-style:italic">herbs in bank</span>
+      </div>
+    </div>
+    ${maxXP > 0 ? `<div class="xp-stat">
+      <div class="xp-stat-label">Best XP from stock</div>
+      <div class="xp-stat-val">${fmtFull(Math.round(maxXP))}</div>
+    </div>` : ''}`;
+
+  const stockEl = document.getElementById('herbStockInput');
+  // Update state silently while typing — no re-render
+  stockEl.oninput = function(){
+    S.herbs[herb] = Math.max(0, parseInt(this.value)||0);
+    document.querySelectorAll(`.herb-item[data-herb="${herb}"]`).forEach(el => {
+      el.classList.toggle('has-stock', S.herbs[herb]>0);
+      el.querySelector('.herb-badge').textContent = S.herbs[herb]>0 ? S.herbs[herb] : '—';
+      el.querySelector('.herb-badge').className = 'herb-badge' + (S.herbs[herb]===0?' zero':'');
+    });
+  };
+  // Only re-render when user is done typing (blur or Enter)
+  stockEl.onblur = function(){ renderHerbView(hdr, main); };
+  stockEl.onkeydown = function(e){ if(e.key==='Enter') this.blur(); };
+
+  // Main content
+  main.innerHTML = '';
+
+  // Group direct potions by tier
+  const byTier = {};
+  for(const pname of herbData.direct){
+    const p = getPot(pname);
+    if(!p) continue;
+    if(!byTier[p.tier]) byTier[p.tier] = [];
+    byTier[p.tier].push(p);
+  }
+
+  const tiersSorted = TIER_ORDER.filter(t => byTier[t]);
+
+  for(const tier of tiersSorted){
+    const pots = byTier[tier].sort((a,b) => a.level - b.level);
+
+    const sdiv = document.createElement('div');
+    sdiv.className = 'sdiv';
+    sdiv.innerHTML = `<span class="sdiv-label" style="color:var(--tc,var(--text-dim))" data-tier="${tier}">${TIER_LABELS[tier]||tier}</span><span class="sdiv-line"></span>`;
+    // Set tier color via inline style
+    const lbl = sdiv.querySelector('[data-tier]');
+    lbl.style.color = getTierColor(tier);
+    main.appendChild(sdiv);
+
+    for(const pot of pots){
+      main.appendChild(makePotCard(pot, false));
+      const chainTree = buildChainTree(pot, 0, new Set([pot.name]));
+      if(chainTree) main.appendChild(chainTree);
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// POTION DRILL VIEW
+// ════════════════════════════════════════════════════════
+function drillIntoPotion(pot){
+  S.drillPotion = pot;
+  S.navStack.push({type:'potion', name:pot.name, pot});
+  renderExplorer();
+}
+
+function renderPotionDrill(hdr, main){
+  const pot = S.drillPotion;
+
+  // Header with breadcrumb
+  hdr.className = 'herb-header visible';
+  hdr.style.flexDirection = 'column';
+  hdr.style.alignItems = 'flex-start';
+  hdr.style.gap = '8px';
+
+  // Breadcrumb
+  const bc = S.navStack.map((item, i) => {
+    const isLast = i === S.navStack.length - 1;
+    return `<span class="bc-item${isLast?' current':''}" data-idx="${i}">${item.name}</span>${isLast?'':'<span class="bc-sep">›</span>'}`;
+  }).join('');
+
+  const n = howMany(pot);
+  const lvl = getPlayerLvl();
+  const hasLvl = lvl >= pot.level;
+  const missing = getMissing(pot);
+  const canMake = n > 0 && hasLvl && missing.length === 0;
+
+  hdr.innerHTML = `
+    <div class="breadcrumb">${bc}</div>
+    <div style="display:flex;align-items:flex-start;gap:12px;width:100%">
+      <div class="pot-drill-icon">${potIcon(pot)}</div>
+      <div style="flex:1">
+        <div class="pot-drill-name">${pot.name}</div>
+        <div class="pot-drill-meta">Level ${pot.level} · ${fmtXP(pot.xp)} XP · ${TIER_LABELS[pot.tier]||pot.tier}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em">${canMake?'Can make':'Status'}</div>
+        <div style="font-family:'Cinzel',serif;font-size:20px;color:${canMake?'var(--green3)':'var(--text-dim)'}">${canMake?n:n===-1?'⛓':'—'}</div>
+      </div>
+    </div>`;
+
+  // Breadcrumb click handlers
+  hdr.querySelectorAll('.bc-item[data-idx]').forEach(el => {
+    el.onclick = () => {
+      const idx = parseInt(el.dataset.idx);
+      S.navStack = S.navStack.slice(0, idx+1);
+      if(idx === 0){
+        S.drillPotion = null;
+      } else {
+        S.drillPotion = S.navStack[idx].pot;
+      }
+      renderExplorer();
+    };
+  });
+
+  main.innerHTML = '';
+
+  // What feeds into this potion
+  const feedsIn = document.createElement('div');
+  feedsIn.innerHTML = '';
+
+  const allInputs = [];
+  if(pot.herb) allInputs.push({label:`🌿 ${pot.herb.name} (via ${pot.herb.unfinished})`, type:'herb', name:pot.herb.name});
+  for(const dh of pot.direct_herbs) allInputs.push({label:`🌿 ${dh.name} (clean herb)`, type:'herb', name:dh.name});
+  for(const s of pot.secondaries) allInputs.push({label:`🧪 ${s.name}${s.qty>1?' ×'+s.qty:''}`, type:'secondary', name:s.name});
+  for(const pi of pot.potion_inputs) allInputs.push({label:`⚗️ ${pi.name}`, type:'potion', name:pi.name});
+
+  if(allInputs.length > 0){
+    const sdiv = document.createElement('div');
+    sdiv.className = 'sdiv';
+    sdiv.innerHTML = `<span class="sdiv-label">Ingredients Required</span><span class="sdiv-line"></span>`;
+    main.appendChild(sdiv);
+
+    const ingGrid = document.createElement('div');
+    ingGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px';
+
+    for(const inp of allInputs){
+      const card = document.createElement('div');
+      let haveIt = false;
+      if(inp.type==='herb') haveIt = getHerbQty(inp.name) > 0;
+      else if(inp.type==='secondary') haveIt = getSecQty(inp.name) > 0;
+      else haveIt = true; // potion inputs — shown differently
+
+      const isPotion = inp.type === 'potion';
+      card.style.cssText = `display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:5px;border:1px solid ${isPotion?'var(--border2)':haveIt?'rgba(93,168,82,.3)':'rgba(184,72,56,.3)'};background:${isPotion?'var(--panel)':haveIt?'rgba(93,168,82,.07)':'rgba(122,46,32,.07)'};cursor:${isPotion?'pointer':'default'};min-width:160px`;
+      card.innerHTML = `<span style="font-size:14px">${inp.label.split(' ')[0]}</span><span style="font-size:13px;color:${isPotion?'var(--blue2)':haveIt?'var(--green2)':'var(--red2)'}">${inp.label.substring(inp.label.indexOf(' ')+1)}</span>`;
+
+      if(isPotion){
+        const p2 = getPot(inp.name);
+        if(p2) card.onclick = () => drillIntoPotion(p2);
+      }
+      ingGrid.appendChild(card);
+    }
+    main.appendChild(ingGrid);
+  }
+
+  // What this potion feeds into (chain map)
+  const chainOuts = DATA.chain_map[pot.name] || DATA.chain_map[norm(pot.name)] || [];
+  if(chainOuts.length > 0){
+    const sdiv2 = document.createElement('div');
+    sdiv2.className = 'sdiv';
+    sdiv2.innerHTML = `<span class="sdiv-label">This potion is used to make (${chainOuts.length})</span><span class="sdiv-line"></span>`;
+    main.appendChild(sdiv2);
+
+    for(const cname of chainOuts){
+      const cp = getPot(cname);
+      if(!cp) continue;
+      const card = makePotCard(cp, false);
+      main.appendChild(card);
+    }
+  }
+
+  // Similar potions from same tier
+  const sameTier = DATA.potions.filter(p => p.tier === pot.tier && p.name !== pot.name).slice(0,6);
+  if(sameTier.length > 0){
+    const sdiv3 = document.createElement('div');
+    sdiv3.className = 'sdiv';
+    sdiv3.style.marginTop = '8px';
+    sdiv3.innerHTML = `<span class="sdiv-label">Other ${TIER_LABELS[pot.tier]||pot.tier} potions</span><span class="sdiv-line"></span>`;
+    main.appendChild(sdiv3);
+
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px';
+    for(const sp of sameTier){
+      const pill = document.createElement('div');
+      pill.style.cssText = `display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:4px;border:1px solid var(--border);background:var(--panel);font-size:12px;cursor:pointer`;
+      pill.innerHTML = `${potIcon(sp)} <span>${sp.name}</span> <span style="color:var(--text-dim)">Lvl ${sp.level}</span>`;
+      pill.onclick = () => drillIntoPotion(sp);
+      grid.appendChild(pill);
+    }
+    main.appendChild(grid);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// BUILD CHAIN TREE — inline pathway table
+// ════════════════════════════════════════════════════════
+function buildChainTree(pot, depth, visited){
+  const chainOuts = DATA.chain_map[pot.name] || DATA.chain_map[norm(pot.name)] || [];
+  if(chainOuts.length === 0) return null;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chain-tree';
+
+  // Header row — collapsible
+  const header = document.createElement('div');
+  header.className = 'chain-tree-header';
+  header.innerHTML = `
+    <span class="chain-tree-toggle">▾</span>
+    <span class="chain-tree-title">Feeds into ${chainOuts.length} potion${chainOuts.length!==1?'s':''}</span>`;
+
+  const body = document.createElement('div');
+  body.className = 'chain-tree-body';
+
+  // Build flat rows showing the full path tree
+  function addRows(potName, indent, parentVisited){
+    const outs = DATA.chain_map[potName] || [];
+    for(const cname of outs){
+      if(parentVisited.has(cname)) continue; // prevent cycles
+      const cp = getPot(cname);
+      const newVisited = new Set(parentVisited);
+      newVisited.add(cname);
+
+      const row = document.createElement('div');
+      row.className = 'chain-tree-row';
+      row.style.paddingLeft = (14 + indent * 20) + 'px';
+
+      const lvl = getPlayerLvl();
+      const hasLvl = cp ? lvl >= cp.level : false;
+      const n = cp ? howMany(cp) : 0;
+      const canMake = cp && n > 0 && hasLvl;
+
+      // Tree line indicator
+      const isLastSibling = outs.indexOf(cname) === outs.length - 1;
+      const lineChar = isLastSibling ? '└─' : '├─';
+
+      // Work out what's needed to make this potion (beyond the potion input itself)
+      // Show recipe inline only if secondaries + direct_herbs <= 2 items total
+      let recipeHtml = '';
+      if(cp){
+        const SKIP = new Set(['Crystal flask','Bomb vial','Powerburst vial','Vial','Vial of water']);
+        const visibleSecs = cp.secondaries.filter(s =>
+          !SKIP.has(s.name) && !s.name.toLowerCase().includes('vial') && !s.name.toLowerCase().includes('flask')
+        );
+        const directHerbs = cp.direct_herbs || [];
+        const allExtras = [...directHerbs.map(h=>({name:h.name,type:'herb',qty:h.qty})),
+                           ...visibleSecs.map(s=>({name:s.name,type:'sec',qty:s.qty}))];
+
+        // Show inline recipe only if 2 or fewer extra ingredients
+        if(allExtras.length > 0 && allExtras.length <= 2){
+          recipeHtml = '<span class="chain-tree-recipe">';
+          for(const ing of allExtras){
+            const have = ing.type==='herb' ? getHerbQty(ing.name) : getSecQty(ing.name);
+            const ok = have >= ing.qty;
+            recipeHtml += `<span class="chain-tree-ing ${ok?'have':'need'}">${ing.type==='herb'?'🌿':'🧪'} ${ing.name}${ing.qty>1?' ×'+ing.qty:''} <em>(${have})</em></span>`;
+          }
+          recipeHtml += '</span>';
+        }
+      }
+
+      row.innerHTML = `
+        <span class="chain-tree-line">${lineChar}</span>
+        <span class="chain-tree-icon">${cp ? potIcon(cp) : '🧪'}</span>
+        <span class="chain-tree-name" style="color:${cp?getTierColor(cp.tier):'var(--text-dim)'}">${cname.replace(/ \(\d\)$/, '')}</span>
+        ${cp ? `<span class="chain-tree-lvl ${hasLvl?'ok':'locked'}">Lvl ${cp.level}</span>` : ''}
+        ${cp ? `<span class="chain-tree-xp">⭐ ${fmtXP(cp.xp)}</span>` : ''}
+        ${canMake ? `<span class="chain-tree-qty">×${n}</span>` : ''}
+        ${cp && !hasLvl ? `<span class="chain-tree-locked">🔒</span>` : ''}
+        ${recipeHtml}`;
+
+      if(cp) row.onclick = () => drillIntoPotion(cp);
+      body.appendChild(row);
+
+      // Recurse one more level
+      if(indent < 3) addRows(cname, indent + 1, newVisited);
+    }
+  }
+
+  addRows(pot.name, 0, new Set([pot.name]));
+
+  // Toggle collapse
+  let open = true;
+  header.onclick = () => {
+    open = !open;
+    body.style.display = open ? '' : 'none';
+    header.querySelector('.chain-tree-toggle').textContent = open ? '▾' : '▸';
+  };
+
+  wrapper.appendChild(header);
+  wrapper.appendChild(body);
+  return wrapper;
+}
+
+// ════════════════════════════════════════════════════════
+// MAKE POTION CARD
+// ════════════════════════════════════════════════════════
+function makePotCard(pot, isChained){
+  const n = howMany(pot);
+  const lvl = getPlayerLvl();
+  const hasLvl = lvl >= pot.level;
+  const missing = getMissing(pot);
+  const isChainedInput = pot.potion_inputs && pot.potion_inputs.length > 0;
+  const canMake = n > 0 && hasLvl && missing.length === 0;
+  const totalXP = canMake ? n * pot.xp : 0;
+
+  let cardClass = `pot-card tier-${pot.tier}`;
+  if(isChained) cardClass += ' chained';
+  if(canMake) cardClass += ' can-make';
+  else if(missing.length > 0 || isChainedInput) cardClass += ' missing';
+  else cardClass += ' locked';
+
+  // Ingredients
+  let ingHtml = '';
+  if(pot.herb){
+    const hq = getHerbQty(pot.herb.name);
+    ingHtml += `<span class="ing ${hq>0?'have':'need'}">🌿 ${pot.herb.name} <em>×${hq}</em></span>`;
+  }
+  for(const dh of pot.direct_herbs){
+    const hq = getHerbQty(dh.name);
+    ingHtml += `<span class="ing ${hq>0?'have':'need'}">🌿 ${dh.name} <em>×${hq}</em></span>`;
+  }
+  for(const s of pot.secondaries){
+    if(s.name.includes('Crystal flask')||s.name.toLowerCase().includes('vial')||s.name.toLowerCase().includes('flask')) continue;
+    const sq = getSecQty(s.name);
+    ingHtml += `<span class="ing ${sq>0?'have':'need'}">🧪 ${s.name}${s.qty>1?' ×'+s.qty:''} <em>(${sq})</em></span>`;
+  }
+  for(const pi of pot.potion_inputs){
+    ingHtml += `<span class="ing">⚗️ ${pi.name}</span>`;
+  }
+
+  // Status line
+  let statusHtml = '';
+  if(!hasLvl)
+    statusHtml = `<span class="pot-status warn">🔒 Requires Herblore ${pot.level}</span>`;
+  else if(isChainedInput)
+    statusHtml = `<span class="pot-status chain">⛓ Made from crafted potions</span>`;
+  else if(missing.length > 0)
+    statusHtml = `<span class="pot-status warn">Missing: ${missing.slice(0,3).map(m=>m.name).join(', ')}${missing.length>3?` +${missing.length-3} more`:''}</span>`;
+
+  const qtyDisplay = canMake ? n : isChainedInput ? '⛓' : '—';
+
+  const card = document.createElement('div');
+  card.className = cardClass;
+  card.innerHTML = `
+    <div class="pot-card-top">
+      <div class="pot-icon">${potIcon(pot)}</div>
+      <div class="pot-name">${pot.name}</div>
+      <span class="pot-lvl ${hasLvl?'met':'locked'}">Lvl ${pot.level}</span>
+    </div>
+    <div class="pot-card-bottom">
+      <div class="pot-meta-row">
+        <span class="pot-xp">⭐ ${fmtXP(pot.xp)} XP</span>
+        ${totalXP > 0 ? `<span class="pot-total-xp">💫 ${fmtFull(Math.round(totalXP))} total</span>` : ''}
+        ${statusHtml}
+      </div>
+      ${ingHtml ? `<div class="ing-row">${ingHtml}</div>` : ''}
+    </div>
+    <div class="pot-right">
+      <div class="pot-qty ${canMake?'':'zero'}">${qtyDisplay}</div>
+      <div class="pot-qty-label">can make</div>
+    </div>`;
+
+  card.onclick = () => drillIntoPotion(pot);
+  return card;
+}
+
+// ════════════════════════════════════════════════════════
+// POTION ICON
+// ════════════════════════════════════════════════════════
+function potIcon(p){
+  const t = p.tier;
+  if(t==='overload'||t==='overload_variant'||t==='supreme_overload'||t==='elder_overload') return '💥';
+  if(t==='combination') return '⚗️';
+  if(t==='juju') return '🌺';
+  if(t==='bomb') return '💣';
+  if(t==='powerburst') return '⚡';
+  if(t==='daemonheim') return '🗡️';
+  if(t==='barbarian') return '🐟';
+  if(t==='extreme') return '🔥';
+  if(t==='super') return '✨';
+  const n = p.name.toLowerCase();
+  if(n.includes('prayer')||n.includes('holy')) return '✨';
+  if(n.includes('attack')) return '⚔️';
+  if(n.includes('strength')) return '💪';
+  if(n.includes('defence')) return '🛡️';
+  if(n.includes('magic')) return '🔮';
+  if(n.includes('rang')) return '🏹';
+  if(n.includes('poison')||n.includes('antipoison')) return '☠️';
+  if(n.includes('energy')||n.includes('stamina')) return '⚡';
+  if(n.includes('fishing')) return '🎣';
+  if(n.includes('brew')) return '🍺';
+  if(n.includes('necromancy')) return '💀';
+  return '🧪';
+}
+
+function getTierColor(tier){
+  const map = {
+    basic:'var(--tbasic)', super:'var(--tsuper)', extreme:'var(--textreme)',
+    overload:'var(--toverload)', overload_variant:'var(--toverload)',
+    supreme_overload:'var(--telder)', elder_overload:'var(--telder)',
+    combination:'var(--tcomb)', juju:'var(--tjuju)', barbarian:'var(--tbarbarian)',
+    bomb:'var(--tbomb)', powerburst:'var(--tpowerburst)', daemonheim:'var(--tdaemon)',
+    primal:'var(--tbasic)', adrenaline:'var(--tpowerburst)',
+  };
+  return map[tier] || 'var(--text-dim)';
+}
+
+// ════════════════════════════════════════════════════════
+// XP RANKINGS TAB
+// ════════════════════════════════════════════════════════
+function renderXPRankings(){
+  const hdr = document.getElementById('herbHeader');
+  hdr.className = 'herb-header';
+  hdr.style.flexDirection = '';
+  hdr.style.alignItems = '';
+
+  const main = document.getElementById('mainArea');
+  main.innerHTML = '';
+  const lvl = getPlayerLvl();
+
+  const rows = [];
+  for(const pot of DATA.potions){
+    if(pot.potion_inputs && pot.potion_inputs.length > 0) continue; // skip chained
+    if(lvl < pot.level) continue;
+    const n = howMany(pot);
+    if(n <= 0) continue;
+    const missing = getMissing(pot);
+    if(missing.length > 0) continue;
+    rows.push({pot, n, totalXP: n * pot.xp});
+  }
+  rows.sort((a,b) => b.totalXP - a.totalXP);
+
+  if(rows.length === 0){
+    main.innerHTML = `<div class="empty-state"><div class="ei">📊</div><h3>No makeable potions yet</h3><p>Enter herb and secondary quantities to see your XP options ranked.</p></div>`;
+    return;
+  }
+
+  const totalXP = rows.reduce((s,r) => s + r.totalXP, 0);
+
+  // Summary strip
+  const strip = document.createElement('div');
+  strip.className = 'summary-strip';
+  strip.innerHTML = `
+    <div class="ss-item"><div class="ss-label">Total XP Available</div><div class="ss-val">${fmtFull(Math.round(totalXP))}</div></div>
+    <div class="ss-item"><div class="ss-label">Unique Options</div><div class="ss-val" style="color:var(--green2)">${rows.length}</div></div>
+    <div class="ss-item" style="flex:1"><div class="ss-label">Best Single Option</div><div class="ss-best">${rows[0].pot.name} — ${fmtFull(Math.round(rows[0].totalXP))} XP</div></div>`;
+  main.appendChild(strip);
+
+  const sdiv = document.createElement('div');
+  sdiv.className = 'sdiv';
+  sdiv.innerHTML = `<span class="sdiv-label">All Potions Ranked by Total XP</span><span class="sdiv-line"></span>`;
+  main.appendChild(sdiv);
+
+  const table = document.createElement('div');
+  table.className = 'rank-table';
+  table.innerHTML = `<div class="rank-row head"><div>#</div><div>Potion</div><div class="rxp">XP/pot</div><div class="rtxp">Total XP</div><div class="rqty">Qty</div></div>`;
+
+  rows.forEach((r,i) => {
+    const row = document.createElement('div');
+    row.className = `rank-row r${i+1}`;
+    row.style.cursor = 'pointer';
+    row.innerHTML = `
+      <div class="rn">${i+1}</div>
+      <div class="rname">${potIcon(r.pot)} ${r.pot.name}</div>
+      <div class="rxp">${fmtXP(r.pot.xp)}</div>
+      <div class="rtxp">${fmtFull(Math.round(r.totalXP))}</div>
+      <div class="rqty">${r.n}</div>`;
+    row.onclick = () => {
+      switchTab('explorer');
+      if(r.pot.herb) selectHerb(r.pot.herb.name);
+      else drillIntoPotion(r.pot);
+    };
+    table.appendChild(row);
+  });
+  main.appendChild(table);
+}
+
+// ════════════════════════════════════════════════════════
+// SECONDARIES TAB — herb-grouped, card design
+// ════════════════════════════════════════════════════════
+function renderSecondaries(){
+  const hdr = document.getElementById('herbHeader');
+  hdr.className = 'herb-header';
+  hdr.style.flexDirection = '';
+
+  const main = document.getElementById('mainArea');
+  main.innerHTML = '';
+  main.style.padding = '20px 24px';
+
+  const SKIP_SEC = new Set(['Crystal flask','Bomb vial','Powerburst vial',
+    'Vial','Vial of water','Vial of water (Dungeoneering)']);
+
+  // Build herb -> [{potName, secName, secQty}]
+  const herbGroups = {};
+  const secToHerbs = {};
+
+  for(const pot of DATA.potions){
+    const herbName = pot.herb ? pot.herb.name : null;
+    if(!herbName) continue;
+    if(pot.secondaries.length === 0) continue;
+    for(const s of pot.secondaries){
+      if(SKIP_SEC.has(s.name) || s.name.toLowerCase().includes('flask') || s.name.toLowerCase().includes('vial')) continue;
+      if(!herbGroups[herbName]) herbGroups[herbName] = [];
+      if(!herbGroups[herbName].find(r => r.secName === s.name)){
+        herbGroups[herbName].push({potName: pot.name, secName: s.name, secQty: s.qty});
+      }
+      if(!secToHerbs[s.name]) secToHerbs[s.name] = new Set();
+      secToHerbs[s.name].add(herbName);
+    }
+  }
+
+  for(const herbName of Object.keys(herbGroups).sort()){
+    const entries = herbGroups[herbName];
+
+    const block = document.createElement('div');
+    block.className = 'sec-herb-block';
+
+    // Herb header
+    block.innerHTML = `
+      <div class="sec-herb-label">
+        <div class="sec-herb-dot"></div>
+        <span class="sec-herb-name">${herbName}</span>
+        <span class="sec-herb-line"></span>
+        <span class="sec-herb-count">${entries.length} ingredient${entries.length!==1?'s':''}</span>
+      </div>`;
+
+    const cards = document.createElement('div');
+    cards.className = 'sec-cards';
+
+    for(const entry of entries){
+      const qty = S.secondaries[entry.secName] || 0;
+      const sharedCount = secToHerbs[entry.secName] ? secToHerbs[entry.secName].size : 1;
+      const isShared = sharedCount > 1;
+
+      const card = document.createElement('div');
+      card.className = `sec-card${qty>0?' has-qty':''}`;
+      card.innerHTML = `
+        <div class="sec-card-info">
+          <div class="sec-card-name">${entry.secName}</div>
+          <div class="sec-card-sub">
+            → ${entry.potName}${entry.secQty>1?` · needs ×${entry.secQty}`:''}
+            ${isShared?`<span class="sec-card-shared"> · used in ${sharedCount} herbs</span>`:''}
+          </div>
+        </div>
+        <input class="sec-card-input${qty>0?' has-qty':''}" type="number" min="0"
+          value="${qty||''}" placeholder="0" data-sec="${entry.secName}" />`;
+
+      const input = card.querySelector('input');
+      input.oninput = function(){
+        const newQty = Math.max(0, parseInt(this.value)||0);
+        S.secondaries[entry.secName] = newQty;
+        const hasQ = newQty > 0;
+        // Sync all matching inputs across the page
+        document.querySelectorAll(`input[data-sec="${CSS.escape(entry.secName)}"]`).forEach(el => {
+          el.value = newQty || '';
+          el.classList.toggle('has-qty', hasQ);
+          el.closest('.sec-card').classList.toggle('has-qty', hasQ);
+        });
+      };
+
+      cards.appendChild(card);
+    }
+
+    block.appendChild(cards);
+    main.appendChild(block);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════════════════════════
+function switchTab(tab){
+  S.activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id===`tab-${tab}`));
+
+  const main = document.getElementById('mainArea');
+  main.style.padding = '16px 20px';
+
+  if(tab === 'explorer'){
+    renderExplorer();
+  } else if(tab === 'secondaries'){
+    renderSecondaries();
+  } else if(tab === 'xprank'){
+    renderXPRankings();
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// INIT — async, loads from Supabase
+// ════════════════════════════════════════════════════════
+document.getElementById('playerLvl').onchange = () => {
+  if(S.activeTab === 'explorer') renderExplorer();
+  if(S.activeTab === 'xprank') renderXPRankings();
+};
+
+// Patch state-mutating functions to auto-save after changes
+const _origUpdateHerbStock = window.updateHerbStock;
+function updateHerbStock(id, val){
+  S.herbs[id] = Math.max(0, parseInt(val)||0);
+  // re-render is handled by the input's own onblur
+  renderHerbList();
+  saveUserStock();
+}
+
+// Patch secondaries to save on change
+document.addEventListener('input', e => {
+  if(e.target && e.target.dataset && e.target.dataset.sec !== undefined){
+    saveUserStock();
+  }
+});
+
+// Spin animation for loading
+const style = document.createElement('style');
+style.textContent = '@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+
+// Boot sequence
+(async () => {
+  try {
+    await loadPotionData();
+    await loadUserStock();
+    renderHerbList();
+    switchTab('explorer');
+  } catch(e) {
+    console.error('Init failed:', e);
+  }
+})();
+</script></body></html>

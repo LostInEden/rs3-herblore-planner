@@ -870,7 +870,7 @@ function selectHerb(herb){
   document.querySelectorAll('.herb-item').forEach(el => {
     el.classList.toggle('active', el.dataset.herb === herb);
   });
-  if(S.activeTab === 'explorer') renderExplorer();
+  switchTab('explorer');
 }
 
 // ════════════════════════════════════════════════════════
@@ -1434,13 +1434,19 @@ function renderSecondaries(){
     }
   }
 
-  for(const herbName of Object.keys(herbGroups).sort()){
-    const entries = herbGroups[herbName];
+  function renderHerbGroup(herbName, entries, sectionLabel){
+    // Add a section divider if this is the first herb in a new group
+    if(sectionLabel){
+      const sdiv = document.createElement('div');
+      sdiv.className = 'sdiv';
+      sdiv.style.marginBottom = '16px';
+      sdiv.innerHTML = `<span class="sdiv-label">${sectionLabel}</span><span class="sdiv-line"></span>`;
+      main.appendChild(sdiv);
+    }
 
     const block = document.createElement('div');
     block.className = 'sec-herb-block';
 
-    // Herb header
     block.innerHTML = `
       <div class="sec-herb-label">
         <div class="sec-herb-dot"></div>
@@ -1475,12 +1481,12 @@ function renderSecondaries(){
         const newQty = Math.max(0, parseInt(this.value)||0);
         S.secondaries[entry.secName] = newQty;
         const hasQ = newQty > 0;
-        // Sync all matching inputs across the page
         document.querySelectorAll(`input[data-sec="${CSS.escape(entry.secName)}"]`).forEach(el => {
           el.value = newQty || '';
           el.classList.toggle('has-qty', hasQ);
           el.closest('.sec-card').classList.toggle('has-qty', hasQ);
         });
+        saveUserStock();
       };
 
       cards.appendChild(card);
@@ -1488,6 +1494,22 @@ function renderSecondaries(){
 
     block.appendChild(cards);
     main.appendChild(block);
+  }
+
+  // Render standard herbs first, then special herbs
+  const standardHerbs = Object.keys(herbGroups).filter(h => STANDARD_HERBS.has(h)).sort();
+  const specialHerbs  = Object.keys(herbGroups).filter(h => !STANDARD_HERBS.has(h)).sort();
+
+  let firstStandard = true;
+  let firstSpecial  = true;
+
+  for(const herbName of standardHerbs){
+    renderHerbGroup(herbName, herbGroups[herbName], firstStandard ? 'Herbs' : null);
+    firstStandard = false;
+  }
+  for(const herbName of specialHerbs){
+    renderHerbGroup(herbName, herbGroups[herbName], firstSpecial ? 'Special Herbs' : null);
+    firstSpecial = false;
   }
 }
 
